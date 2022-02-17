@@ -1,72 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="static/css/stylesheet.css">
-    <link href="https://fonts.googleapis.com/css?family=Thasadith&display=swap" rel="stylesheet"/>
-    <title>Document</title>
-</head>
-<body>
-    <header>
-        <img id="logo" src="static/images/png.png" width="90" height="90" />
-        <h1 id="title">Travely</h1>
-        <h1 id="number">+371 29749980</h1>
-        <button id="login"><span class="button-text">Mans profils</span></button>
-    </header>
-    <div id="pages">
-        <a href="/">Sākumlapa</a>
-        <span class="pages"><b>></b></span>
-        <a href="/profils">Mans Profils</a>
-    </div>
+{% extends "index.html" %}
+{% block content %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <h1 style="color:rgb(0, 0, 0); position: absolute; top: 100px; left: 780px;">{{ message }}</h1>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     <div id="profile-content">
         <div id="profile">
-            <h2 id="informacija">Personīgā informācija</h2>
-
+            <div class="profile-titlebar">
+                <h1 id="profile-titlebar-text">Lietotāja dati</h1>
+            </div>
             <div id="informacija-mainit">
-                <div id="personiga-informacija">
-                    <h1><span class="box-text">Vārds:</span></h1>
-                    <h1><span class="box-text">E-pasts:</span></h1>
-                    <h1><span class="box-text">Tel. nr.:</span></h1>
+                <div>
+                    <h2 class="profile-box-text-gray">Vārds</h2>
+                    <h2 class="profile-box-text-gray">Uzvārds</h2>
+                    <h2 class="profile-box-text-gray">E-pasts</h2>
+                    <h2 class="profile-box-text-gray">Parole</h2>
+
                 </div>
-                <button id="mainit"><span class="button-text">Mainīt</span></button> 
+                <div style="margin-left: 30%;">
+                    <h2 class="profile-box-text">{{ user.name }}</h2>
+                    <h2 class="profile-box-text">{{ user.surname }}</h2>
+                    <h2 class="profile-box-text">{{ user.email }}</h2>
+                    <h2 class="profile-box-text">...</h2>
+
+                </div>
+            </div>
+            <div class="user-info-control">
+                <a href="" class="button" id="button-delete-profile">Dzēst profilu</a>
+                <a href="/profile/edit" class="button" id="button-correct-2">Mainīt</a>
             </div>
         </div>
-
-        <div>
-            <h1 id="rezervet">Rezervētie ceļojumi</h1>
-            <div id="rezervetie-celojumi" class="DivToScroll DivWithScroll">
-                <div id="celojumi">
-                    <div id="celojuma-atcelt">
+        <div id="rezervetie-celojumi">
+            <div class="reservation-list-titlebar">
+                <h1 id="reservation-titlebar-text">Rezervācijas</h1>
+            </div>
+            <div class="DivToScroll DivWithScroll">
+                {% for reservation in reservations %}
+                    <div id="celojumi">
                         <div id="celojuma-informacija">
-                            <h1 class="box-text">Rez nr.:</h1>
-                            <h1 class="box-text">Maršuts:</h1>
-                            <h1 class="box-text">Izbraukšana:</h1>
-                            <h1 class="box-text">Atgriešanās:</h1>
-                            <h1 class="box-text">Dienu skaits:</h1>
-                            <h1 class="box-text">Cena:</h1>
+                            <h1 id="destination-text-bold">{{ reservation.country_from }} - {{ reservation.country_to }}</h1>
+                            <h1 class="reservation-box-text">Rez.nr. {{ reservation.reservation_number }}</h1>
+                            <h1 class="reservation-box-text">Dienu skaits: {{ reservation.days }}</h1>
+                            <h1 class="reservation-box-text">Izbraukšana: <b>{{ reservation.date_from.strftime("%Y-%m-%d %H:%M") }}</b></h1>
+                            <h1 class="reservation-box-text">Atgriešanās: <b>{{ reservation.date_to.strftime("%Y-%m-%d %H:%M") }}</b></h1>
+                            <h1 id="price-text-bold">Cena: {{ reservation.price }}€</h1>
+                            <a href="/upload/{{ reservation.id }}/{{ reservation.owner_id }}" class="button" id="button-reserve" style="margin-top: 6px;">Izprintēt</a>
                         </div>
-                        <button id="atcelt"><span class="button-text">Atcelt</span></button> 
+                        <a href="/reservation/remove/{{ reservation.id }}" class="button" id="button-reserve" style="margin-right: 10px;">Atcelt</a>
                     </div>
-                </div>
-
-                <div id="celojumi">
-                    <div id="celojuma-atcelt">
-                        <div id="celojuma-informacija">
-                            <h1 class="box-text">Rez nr.:</h1>
-                            <h1 class="box-text">Maršuts:</h1>
-                            <h1 class="box-text">Izbraukšana:</h1>
-                            <h1 class="box-text">Atgriešanās:</h1>
-                            <h1 class="box-text">Dienu skaits:</h1>
-                            <h1 class="box-text">Cena:</h1>
-                        </div>
-                        <button id="atcelt"><span class="button-text">Atcelt</span></button> 
-                    </div>
-                </div>
-
+                {% endfor %}
             </div>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}

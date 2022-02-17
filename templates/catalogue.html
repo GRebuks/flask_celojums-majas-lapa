@@ -1,0 +1,65 @@
+{% extends "index.html" %}
+{% block content %}
+
+<div id="search-bar-back" class="one-pixel-search-back">
+    <div class="catalogue-search-page">
+        <div>
+            <p>Ceļojums:</p>
+            <div>
+                <select name="from" id="from">
+                    <option value="">Nenoteikts:</option>
+                        {% for country in countries %}
+                            <option value="{{ country.id }}">{{ country.country }}</option>
+                        {% endfor %}
+                </select>
+                →
+                <select name="to" id="to">
+                    <option value="">Nenoteikts:</option>
+                        {% for country in countries %}
+                            <option value="{{ country.id }}">{{ country.country }}</option>
+                        {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div>
+            <p>Datums:</p>
+            <div>
+                <input id="from_date" type="date" placeholder="No">
+                :
+                <input id="to_date" type="date" placeholder="Līdz">
+            </div>
+        </div>
+        <button id="submit-button" class="search-button" type="submit">Meklēt</button>
+    </div>
+</div>
+
+<div id="catalogue-list">
+    {% if trips %}
+        {% for trip in trips %}
+            <div class="catalogue-list-element">
+                <img src="{{ url_for('static', filename='/images/destinations/' + trip.img_file) }}" class="catalogue-list-element-img">
+                <div class="catalogue-list-element-text">
+                    <h2>
+                        {% for country in countries %}
+                            {% if country.id == trip.country_from %}
+                                {{ country.country }} -
+                            {% endif %}
+                        {% endfor %}
+                        {% for country in countries %}
+                            {% if country.id == trip.country_to %}
+                                {{ country.country }}
+                            {% endif %}
+                        {% endfor %}
+                    </h2>
+                    <p>{{ trip.description }}</p>
+                    <h2>{{ trip.cost }}€</h2>
+                    <p>{{ trip.date_from.strftime("%Y-%m-%d %H:%M") }} - {{ trip.date_to.strftime("%Y-%m-%d %H:%M") }}</p>
+                </div>
+                <a href="/reservation/{{ trip.id }}" class="button" id="button-reserve">Rezervēt</a>
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="static/js/catalogue_filter.js"></script>
+{% endblock %}

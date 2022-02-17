@@ -1,12 +1,30 @@
-from flask_sqlalchemy import SQLAlchemy
 from settings import app
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from sqlalchemy import MetaData
+
+# Database
+
+convention = {
+    "ix": 'ix_%(column_0_label)s',
+    "uq": "uq_%(table_name)s_%(column_0_name)s",
+    "ck": "ck_%(table_name)s_%(constraint_name)s",
+    "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
+    "pk": "pk_%(table_name)s"
+}
+
+_metadata = MetaData(naming_convention=convention)
 
 # Database Connection
 db_name = 'travely_database.db'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_name
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
-db = SQLAlchemy(app)
+db = SQLAlchemy(app, metadata=_metadata)
+
+# Migrate
+migrate = Migrate(app, db, render_as_batch=True)
+
 
 class Agency(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -17,19 +35,121 @@ class Agency(db.Model):
     def __repr__(self):
         return self.name
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "address": self.address,
+            "number": self.number
+        }
+
+class Country(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    country = db.Column(db.String(48), nullable=False)
+    abbreviation = db.Column(db.String(2), nullable=False)
+    def __repr__(self):
+        return f'{self.country}, {self.abbreviation}'
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "country": self.country,
+            "abbreviation": self.abbreviation
+        }
+
 class Trip(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     agency_id = db.Column(db.Integer, db.ForeignKey("agency.id"))
-    country_from = db.Column(db.String(30))
-    country_to = db.Column(db.String(30))
-    date_from = db.Column(db.Date)
-    date_to = db.Column(db.Date)
+    country_from = db.Column(db.Integer)
+    country_to = db.Column(db.Integer)
+    date_from = db.Column(db.DateTime)
+    date_to = db.Column(db.DateTime)
     description = db.Column(db.String(280))
     cost = db.Column(db.Float)
     ticket_amount = db.Column(db.Integer)
     views = db.Column(db.Integer)
+    img_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+
     def __repr__(self):
         return f'<Trip: {self.country_from} - {self.country_to} from agency {self.agency_id}>'
 
     def get_agency_from_id(self):
         return Agency.query.filter(Agency.id == self.agency_id).first()
+    
+    def serialize(self):
+        return {
+            "id": self.id,
+            "agency_id": self.agency_id,
+            "country_from_id": self.country_from,
+            "country_to_id": self.country_to,
+            "country_from": "",
+            "country_to": "",
+            "date_from": self.date_from,
+            "date_to": self.date_to,
+            "description": self.description,
+            "cost": self.cost,
+            "ticket_amount": self.ticket_amount,
+            "views": self.views,
+            "img_file": self.img_file
+        }
+            
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(30), nullable=False, unique=True)
+    password = db.Column(db.String(30), nullable=False)
+    name = db.Column(db.String(30), nullable=False)
+    surname = db.Column(db.String(30), nullable=False)
+    role_id = db.Column(db.Integer)
+    
+    def __repr__(self):
+        return f'User: {self.name} {self.surname}, roleID = {self.role_id}'
+    
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "surname": self.surname,
+            "email": self.email,
+            "role_id": self.role_id
+        }
+
+class Reservation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    owner_name = db.Column(db.String(30), nullable=False)
+    owner_surname = db.Column(db.String(30), nullable=False)
+    country_from =  db.Column(db.String(30), nullable=False)
+    country_to =  db.Column(db.String(30), nullable=False)
+    date_from = db.Column(db.DateTime)
+    date_to = db.Column(db.DateTime)
+    days = db.Column(db.Integer)
+    price = db.Column(db.Float)
+    reservation_number = db.Column(db.Integer)
+    owner_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    trip_id = db.Column(db.Integer, db.ForeignKey("trip.id"))
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "owner_name": self.owner_name,
+            "owner_surname": self.owner_surname,
+            "country_from": self.country_from,
+            "country_to": self.country_to,
+            "date_from": self.date_from,
+            "date_to": self.date_to,
+            "days": self.days,
+            "price": self.price,
+            "reservation_number": self.reservation_number,
+            "owner_id": self.owner_id,
+            "trip_id": self.trip_id
+        }
+'''
+set FLASK_APP=models.py
+
+flask db init
+
+flask db migrate -m "(nosaukums)"
+
+flask db upgrade
+
+flask db migrate -m "Atbilstoši, esmu pievienojis jaunu, kritiski vajadzīgu tabulu iekš jau iepriekšveidotās datubāzes, ko izmantojam šajā vietnē. Atbilstoši, tabulas nosaukums ir Country."
+'''

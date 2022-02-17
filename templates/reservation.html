@@ -1,0 +1,29 @@
+{% extends "index.html" %}
+{% block content %}
+<!-- NEaizTiec -->
+<div id="catalogue-list">
+    {% if trip %}
+        <div id="reservation-elements">
+            <div class="reservetion-list-element">
+                <img src="{{ url_for('static', filename='/images/destinations/' + trip.img_file) }}" class="catalogue-list-element-img">
+                <div class="reservetion-list-element-text">
+                    <h2>{{ countries[trip.country_from - 1].country }} - {{ countries[trip.country_to - 1].country }}</h2>
+                    <p>{{ trip.description }}</p>
+                    <h2>{{ trip.cost }}€</h2>
+                    <p>{{ trip.date_from.strftime("%Y-%m-%d %H:%M") }} - {{ trip.date_to.strftime("%Y-%m-%d %H:%M") }}</p>
+                </div>
+            </div>
+            <div id="personal-info">
+                <h2 id="informacija">Personīgā informācija</h2>
+                <div id="personiga-informacija">
+                    <h2>Vārds: {{ user.name }} {{ user.surname }}</h2>
+                    <h2>E-pasts: {{ user.email }}</h2>
+                </div>
+                <a href="/profile" class="button" id="button-reserve">Mainīt</a>
+            </div>
+            <a href="/reservation/add/{{ trip.id }}" class="button" id="button-reserve" style="margin-left: auto;">Rezervēt</a>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}
